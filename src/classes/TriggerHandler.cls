@@ -41,13 +41,13 @@ public abstract class TriggerHandler {
         this.runDmlForRelatedRecords();
     }
 
-    protected virtual void beforeInsert(List<SObject> newRecords) {}
-    protected virtual void beforeUpdate(List<SObject> updatedRecords, Map<Id, SObject> updatedRecordsMap, List<SObject> oldRecords, Map<Id, SObject> oldRecordsMap) {}
-    protected virtual void beforeDelete(List<SObject> deletedRecords, Map<Id, SObject> deletedRecordsMap) {}
-    protected virtual void afterInsert(List<SObject> newRecords, Map<Id, SObject> newRecordsMap) {}
-    protected virtual void afterUpdate(List<SObject> updatedRecords, Map<Id, SObject> updatedRecordsMap, List<SObject> oldRecords, Map<Id, SObject> oldRecordsMap) {}
-    protected virtual void afterDelete(List<SObject> deletedRecords, Map<Id, SObject> deletedRecordsMap) {}
-    protected virtual void afterUndelete(List<SObject> undeletedRecords, Map<Id, SObject> undeletedRecordsMap) {}
+    protected virtual void beforeInsert(List<SObject> newRecordList) {}
+    protected virtual void beforeUpdate(List<SObject> updatedRecordList, Map<Id, SObject> updatedRecordMap, List<SObject> oldRecordList, Map<Id, SObject> oldRecordMap) {}
+    protected virtual void beforeDelete(List<SObject> deletedRecordList, Map<Id, SObject> deletedRecordMap) {}
+    protected virtual void afterInsert(List<SObject> newRecordList, Map<Id, SObject> newRecordMap) {}
+    protected virtual void afterUpdate(List<SObject> updatedRecordList, Map<Id, SObject> updatedRecordMap, List<SObject> oldRecordList, Map<Id, SObject> oldRecordMap) {}
+    protected virtual void afterDelete(List<SObject> deletedRecordList, Map<Id, SObject> deletedRecordMap) {}
+    protected virtual void afterUndelete(List<SObject> undeletedRecordList, Map<Id, SObject> undeletedRecordMap) {}
 
     private void setTriggerContext() {
         this.isTriggerExecuting = Trigger.isExecuting;
@@ -68,9 +68,9 @@ public abstract class TriggerHandler {
     }
 
     private void setHashCode() {
-        List<SObject> records = Trigger.new != null ? Trigger.new : Trigger.old;
+        List<SObject> recordList = Trigger.new != null ? Trigger.new : Trigger.old;
         List<String> parsedRecordsJson = new List<String>();
-        for(SObject record : records) {
+        for(SObject record : recordList) {
             // Some fields can cause the hash code to change even when the record itself has not
             // To get a consistent hash code, we deserialize into JSON, remove the problematic fields, then get the hash code
             Map<String, Object> parsedRecordMap = (Map<String, Object>)JSON.deserializeUntyped(JSON.serialize(record));
