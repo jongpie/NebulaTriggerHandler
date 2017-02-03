@@ -1,27 +1,44 @@
 public abstract class TriggerHandler {
 
-    public TriggerContext context; // the current context of the trigger
+    private static Map<Integer, Set<TriggerContext>> hashCodesForProcessedRecords = new Map<Integer, Set<TriggerContext>>();
+
     public enum TriggerContext {
         BEFORE_INSERT, BEFORE_UPDATE, BEFORE_DELETE,
         AFTER_INSERT, AFTER_UPDATE, AFTER_DELETE, AFTER_UNDELETE
     }
+    public TriggerContext context; // The current context of the trigger
 
-    private Integer hashCode; // the hash code for the current records
-    private Boolean isTriggerExecuting; // the current context of the trigger
+    private Integer hashCode; // The hash code for the current records
+    private Boolean isTriggerExecuting; // Checks if the code was called by a trigger
 
     protected TriggerHandler() {
         this.setTriggerContext();
         this.validateTriggerContext();
+        this.setHashCode();
     }
 
-    public void run() {
-		if(this.context == TriggerContext.BEFORE_INSERT) this.beforeInsert(Trigger.new);
+    public void execute() {
+        String sobjectType = Trigger.new == null ? Trigger.old.getSObjectType() : Trigger.new.getSObjectType();
+        System.debug('Starting execute method for: ' + sobjectType);
+        System.debug('Hash codes already processed: ' + TriggerHandler.hashCodesForProcessedRecords);
+        System.debug('Hash code for current records: ' + this.hashCode);
+        System.debug('Trigger context for current records: ' + this.context);
+        System.debug('Number of current records: ' + Trigger.size);
+
+        if(this.haveRecordsAlreadyBeenProcessed()) {
+            System.debug('Records already processed for this context, skipping');
+            return;
+        } else System.debug('Records have not been processed for this context, continuing');
+
+        if(this.context == TriggerContext.BEFORE_INSERT) this.beforeInsert(Trigger.new);
         else if(this.context == TriggerContext.BEFORE_UPDATE) this.beforeUpdate(Trigger.new, Trigger.newMap, Trigger.old, Trigger.oldMap);
         else if(this.context == TriggerContext.BEFORE_DELETE) this.beforeDelete(Trigger.old, Trigger.oldMap);
         else if(this.context == TriggerContext.AFTER_INSERT) this.afterInsert(Trigger.new, Trigger.newMap);
         else if(this.context == TriggerContext.AFTER_UPDATE) this.afterUpdate(Trigger.new, Trigger.newMap, Trigger.old, Trigger.oldMap);
         else if(this.context == TriggerContext.AFTER_DELETE) this.afterDelete(Trigger.old, Trigger.oldMap);
         else if(this.context == TriggerContext.AFTER_UNDELETE) this.afterUndelete(Trigger.new, Trigger.newMap);
+
+        this.runDmlForRelatedRecords();
     }
 
     protected virtual void beforeInsert(List<SObject> newRecords) {}
@@ -48,6 +65,50 @@ public abstract class TriggerHandler {
     private void validateTriggerContext() {
         String errorMessage = 'Trigger handler called outside of trigger execution';
         if(!this.isTriggerExecuting || this.context == null) throw new Exceptions.TriggerHandlerException(errorMessage);
+    }
+
+    private void setHashCode() {
+        List<SObject> records = Trigger.new != null ? Trigger.new : Trigger.old;
+        List<String> parsedRecordsJson = new List<String>();
+        for(SObject record : records) {
+            // Some fields can cause the hash code to change even when the record itself has not
+            // To get a consistent hash code, we deserialize into JSON, remove the problematic fields, then get the hash code
+            Map<String, Object> parsedRecordMap = (Map<String, Object>)JSON.deserializeUntyped(JSON.serialize(record));
+            parsedRecordMap.remove('CompareName');
+            parsedRecordMap.remove('CreatedById');
+            parsedRecordMap.remove('CreatedDate');
+            parsedRecordMap.remove('LastModifiedById');
+            parsedRecordMap.remove('LastModifiedDate');
+            parsedRecordMap.remove('SystemModstamp');
+
+            // Since we're using an untyped object (map) & JSON string to generate the hash code, we need to sort the fields
+            // Maps & sets aren't sortable, so we have to sort it ourselves
+            Map<String, Object> sortedRecordMap = new Map<String, Object>();
+            List<String> sortedKeySet = new List<String>(parsedRecordMap.keySet());
+            sortedKeySet.sort();
+            for(String key : sortedKeySet) sortedRecordMap.put(key, parsedRecordMap.get(key));
+
+            parsedRecordsJson.add(JSON.serialize(sortedRecordMap));
+        }
+        this.hashCode = parsedRecordsJson.hashCode();
+    }
+
+    private Boolean haveRecordsAlreadyBeenProcessed() {
+        // This method is a safeguard that checks to see if we have recursion problems and stops if we do
+        // It allows each context to occur once for a given hash code
+        if(this.context == TriggerContext.BEFORE_INSERT) {
+            // BEFORE_INSERT doesn't have record IDs yet, so the hash here will never match the other hashes
+            // Since Salesforce makes it impossible to recursively run "insert record", we can let the platform handle it
+            return false;
+        } else if(!TriggerHandler.hashCodesForProcessedRecords.containsKey(this.hashCode)) {
+            TriggerHandler.hashCodesForProcessedRecords.put(this.hashCode, new Set<TriggerContext>{this.context});
+            return false;
+        } else if(!TriggerHandler.hashCodesForProcessedRecords.get(this.hashCode).contains(this.context)) {
+            TriggerHandler.hashCodesForProcessedRecords.get(this.hashCode).add(this.context);
+            return false;
+        } else {
+            return true;
+        }
     }
 
 }
