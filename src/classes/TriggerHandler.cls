@@ -18,6 +18,10 @@ public abstract class TriggerHandler {
     }
 
     public void execute() {
+        // Check the custom setting. If it's disabled, stop everything, show's over
+        // You don't have to go home but you can't stay here
+        if(!TriggerSettings__c.getInstance().ExecuteTriggers__c) return;
+
         String sobjectType = Trigger.new == null ? Trigger.old.getSObjectType() : Trigger.new.getSObjectType();
         System.debug('Starting execute method for: ' + sobjectType);
         System.debug('Hash codes already processed: ' + TriggerHandler.hashCodesForProcessedRecords);
