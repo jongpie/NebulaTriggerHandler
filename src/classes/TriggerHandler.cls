@@ -20,7 +20,7 @@ public abstract class TriggerHandler {
     public void execute() {
         // Check the custom setting. If it's disabled, stop everything, show's over
         // You don't have to go home but you can't stay here
-        if(!TriggerSettings__c.getInstance().ExecuteTriggers__c) return;
+        if(!shouldExecuteTriggers()) return;
 
         String sobjectType = Trigger.new == null ? Trigger.old.getSObjectType() : Trigger.new.getSObjectType();
         System.debug('Starting execute method for: ' + sobjectType);
@@ -69,6 +69,20 @@ public abstract class TriggerHandler {
     private void validateTriggerContext() {
         String errorMessage = 'Trigger handler called outside of trigger execution';
         if(!this.isTriggerExecuting || this.context == null) throw new Exceptions.TriggerHandlerException(errorMessage);
+    }
+
+    private Boolean shouldExecuteTriggers() {
+        TriggerSettings__c triggerSettings = TriggerSettings__c.getInstance();
+
+        if(triggerSettings.Id == null) {
+            // If there's no ID, then there are settings setup for the current user at the user, profile or org level
+            // Upsert the org defaults - the default field values will be used
+            upsert TriggerSettings__c.getOrgDefaults();
+            // Call getInstance() again to get the settings with the field defaults
+            triggerSettings = TriggerSettings__c.getInstance();
+        }
+
+        return triggerSettings.ExecuteTriggers__c;
     }
 
     private void setHashCode() {
