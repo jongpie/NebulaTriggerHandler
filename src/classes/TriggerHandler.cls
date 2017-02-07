@@ -84,9 +84,9 @@ public abstract class TriggerHandler {
             // Since we're using an untyped object (map) & JSON string to generate the hash code, we need to sort the fields
             // Maps & sets aren't sortable, so we have to sort it ourselves
             Map<String, Object> sortedRecordMap = new Map<String, Object>();
-            List<String> sortedKeySet = new List<String>(parsedRecordMap.keySet());
-            sortedKeySet.sort();
-            for(String key : sortedKeySet) sortedRecordMap.put(key, parsedRecordMap.get(key));
+            List<String> sortedKeyList = new List<String>(parsedRecordMap.keySet());
+            sortedKeyList.sort();
+            for(String key : sortedKeyList) sortedRecordMap.put(key, parsedRecordMap.get(key));
 
             parsedRecordsJson.add(JSON.serialize(sortedRecordMap));
         }
