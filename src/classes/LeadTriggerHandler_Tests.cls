@@ -1,5 +1,5 @@
 @isTest
-private class LeadTriggerHandler_Test {
+private class LeadTriggerHandler_Tests {
 
     @isTest
     static void setStatus_Test() {
