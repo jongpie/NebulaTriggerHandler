@@ -1,6 +1,6 @@
 public without sharing class LeadTriggerHandler extends TriggerHandler {
 
-    protected override void beforeInsert(List<SObject> newRecordList) {
+    protected override void executeBeforeInsert(List<SObject> newRecordList) {
         List<Lead> newLeadList = (List<Lead>)newRecordList;
 
         for(Lead newLead : newLeadList) {
@@ -8,7 +8,7 @@ public without sharing class LeadTriggerHandler extends TriggerHandler {
         }
     }
 
-    protected override void beforeUpdate(List<SObject> updatedRecordList, Map<Id, SObject> updatedRecordListMap, List<SObject> oldRecordList, Map<Id, SObject> oldRecordMap) {
+    protected override void executeBeforeUpdate(List<SObject> updatedRecordList, Map<Id, SObject> updatedRecordListMap, List<SObject> oldRecordList, Map<Id, SObject> oldRecordMap) {
         List<Lead> updatedLeadList = (List<Lead>)updatedRecordList;
         Map<Id, Lead> oldLeadMap   = (Map<Id, Lead>)oldRecordMap;
 
@@ -21,7 +21,7 @@ public without sharing class LeadTriggerHandler extends TriggerHandler {
 
     private void setStatus(Lead updatedLead, Lead oldLead) {
         // Add logic here. Methods can be overloaded to handle updates & inserts
-        if(updatedLead.Source != oldLead.Source) {
+        if(updatedLead.LeadSource != oldLead.LeadSource) {
             this.setStatus(updatedLead);
         }
     }

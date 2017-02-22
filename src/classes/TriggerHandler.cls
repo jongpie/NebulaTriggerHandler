@@ -8,46 +8,82 @@ public abstract class TriggerHandler {
     }
     public TriggerContext context; // The current context of the trigger
 
+    private String className;
     private Integer hashCode; // The hash code for the current records
     private Boolean isTriggerExecuting; // Checks if the code was called by a trigger
+    private TriggerSettings__c triggerSettings;
 
     protected TriggerHandler() {
+        this.getClassName();
+        this.getTriggerSettings();
+
+        this.addDebugStatement('Initializing ' + this.className);
         this.setTriggerContext();
         this.validateTriggerContext();
         this.setHashCode();
     }
 
     public void execute() {
-        String sobjectType = Trigger.new == null ? Trigger.old.getSObjectType() : Trigger.new.getSObjectType();
-        System.debug('Starting execute method for: ' + sobjectType);
-        System.debug('Hash codes already processed: ' + TriggerHandler.hashCodesForProcessedRecords);
-        System.debug('Hash code for current records: ' + this.hashCode);
-        System.debug('Trigger context for current records: ' + this.context);
-        System.debug('Number of current records: ' + Trigger.size);
+        this.addDebugStatement('Execute method called for ' + this.className);
+        // Check the custom setting. If it's disabled, stop everything, show's over
+        // You don't have to go home but you can't stay here
+        if(!shouldExecuteTriggers()) {
+            this.addDebugStatement('Skipping execution of class ' + this.className);
+            return;
+        }
+
+        this.addDebugStatement(this.className + ' is enabled, proceeding with execution');
+
+        String sobjectType = Trigger.new == null ? String.valueOf(Trigger.old.getSObjectType()) : String.valueOf(Trigger.new.getSObjectType());
+        this.addDebugStatement('Starting execute method for: ' + sobjectType);
+        this.addDebugStatement('Hash codes already processed: ' + TriggerHandler.hashCodesForProcessedRecords);
+        this.addDebugStatement('Hash code for current records: ' + this.hashCode);
+        this.addDebugStatement('Trigger context for current records: ' + this.context);
+        this.addDebugStatement('Number of current records: ' + Trigger.size);
 
         if(this.haveRecordsAlreadyBeenProcessed()) {
-            System.debug('Records already processed for this context, skipping');
+            this.addDebugStatement('Records already processed for this context, skipping');
             return;
-        } else System.debug('Records have not been processed for this context, continuing');
+        } else this.addDebugStatement('Records have not been processed for this context, continuing');
 
-        if(this.context == TriggerContext.BEFORE_INSERT) this.beforeInsert(Trigger.new);
-        else if(this.context == TriggerContext.BEFORE_UPDATE) this.beforeUpdate(Trigger.new, Trigger.newMap, Trigger.old, Trigger.oldMap);
-        else if(this.context == TriggerContext.BEFORE_DELETE) this.beforeDelete(Trigger.old, Trigger.oldMap);
-        else if(this.context == TriggerContext.AFTER_INSERT) this.afterInsert(Trigger.new, Trigger.newMap);
-        else if(this.context == TriggerContext.AFTER_UPDATE) this.afterUpdate(Trigger.new, Trigger.newMap, Trigger.old, Trigger.oldMap);
-        else if(this.context == TriggerContext.AFTER_DELETE) this.afterDelete(Trigger.old, Trigger.oldMap);
-        else if(this.context == TriggerContext.AFTER_UNDELETE) this.afterUndelete(Trigger.new, Trigger.newMap);
-
-        this.runDmlForRelatedRecords();
+        if(this.context == TriggerContext.BEFORE_INSERT) this.executeBeforeInsert(Trigger.new);
+        else if(this.context == TriggerContext.BEFORE_UPDATE) this.executeBeforeUpdate(Trigger.new, Trigger.newMap, Trigger.old, Trigger.oldMap);
+        else if(this.context == TriggerContext.BEFORE_DELETE) this.executeBeforeDelete(Trigger.old, Trigger.oldMap);
+        else if(this.context == TriggerContext.AFTER_INSERT) this.executeAfterInsert(Trigger.new, Trigger.newMap);
+        else if(this.context == TriggerContext.AFTER_UPDATE) this.executeAfterUpdate(Trigger.new, Trigger.newMap, Trigger.old, Trigger.oldMap);
+        else if(this.context == TriggerContext.AFTER_DELETE) this.executeAfterDelete(Trigger.old, Trigger.oldMap);
+        else if(this.context == TriggerContext.AFTER_UNDELETE) this.executeAfterUndelete(Trigger.new, Trigger.newMap);
     }
 
-    protected virtual void beforeInsert(List<SObject> newRecordList) {}
-    protected virtual void beforeUpdate(List<SObject> updatedRecordList, Map<Id, SObject> updatedRecordMap, List<SObject> oldRecordList, Map<Id, SObject> oldRecordMap) {}
-    protected virtual void beforeDelete(List<SObject> deletedRecordList, Map<Id, SObject> deletedRecordMap) {}
-    protected virtual void afterInsert(List<SObject> newRecordList, Map<Id, SObject> newRecordMap) {}
-    protected virtual void afterUpdate(List<SObject> updatedRecordList, Map<Id, SObject> updatedRecordMap, List<SObject> oldRecordList, Map<Id, SObject> oldRecordMap) {}
-    protected virtual void afterDelete(List<SObject> deletedRecordList, Map<Id, SObject> deletedRecordMap) {}
-    protected virtual void afterUndelete(List<SObject> undeletedRecordList, Map<Id, SObject> undeletedRecordMap) {}
+    protected virtual void executeBeforeInsert(List<SObject> newRecordList) {}
+    protected virtual void executeBeforeUpdate(List<SObject> updatedRecordList, Map<Id, SObject> updatedRecordMap, List<SObject> oldRecordList, Map<Id, SObject> oldRecordMap) {}
+    protected virtual void executeBeforeDelete(List<SObject> deletedRecordList, Map<Id, SObject> deletedRecordMap) {}
+    protected virtual void executeAfterInsert(List<SObject> newRecordList, Map<Id, SObject> newRecordMap) {}
+    protected virtual void executeAfterUpdate(List<SObject> updatedRecordList, Map<Id, SObject> updatedRecordMap, List<SObject> oldRecordList, Map<Id, SObject> oldRecordMap) {}
+    protected virtual void executeAfterDelete(List<SObject> deletedRecordList, Map<Id, SObject> deletedRecordMap) {}
+    protected virtual void executeAfterUndelete(List<SObject> undeletedRecordList, Map<Id, SObject> undeletedRecordMap) {}
+
+    private void getClassName() {
+        this.className = String.valueOf(this).split(':')[0];
+    }
+
+    private void getTriggerSettings() {
+        this.triggerSettings = TriggerSettings__c.getInstance();
+
+        if(this.triggerSettings.Id == null) {
+            // If there's no ID, then there are settings setup for the current user at the user, profile or org level
+            // Upsert the org defaults - the default field values will be used
+            upsert TriggerSettings__c.getOrgDefaults();
+            // Call getInstance() again to get the settings with the field defaults
+            this.triggerSettings = TriggerSettings__c.getInstance();
+        }
+    }
+
+    private void addDebugStatement(String debugStatement) {
+        if(!this.triggerSettings.EnableDebugging__c) return;
+
+        System.debug(debugStatement);
+    }
 
     private void setTriggerContext() {
         this.isTriggerExecuting = Trigger.isExecuting;
@@ -64,7 +100,19 @@ public abstract class TriggerHandler {
 
     private void validateTriggerContext() {
         String errorMessage = 'Trigger handler called outside of trigger execution';
-        if(!this.isTriggerExecuting || this.context == null) throw new Exceptions.TriggerHandlerException(errorMessage);
+        if(!this.isTriggerExecuting || this.context == null) throw new TriggerHandlerException(errorMessage);
+    }
+
+    private Boolean shouldExecuteTriggers() {
+        this.addDebugStatement('triggerSettings.ExecuteTriggers__c=' + this.triggerSettings.ExecuteTriggers__c);
+
+        String handlerClassesToSkipString = this.triggerSettings.HandlerClassesToSkip__c;
+        if(handlerClassesToSkipString == null) handlerClassesToSkipString = '';
+        Set<String> handlerClassesToSkip = new Set<String>(handlerClassesToSkipString.toLowerCase().split('\n'));
+        this.addDebugStatement('triggerSettings.HandlerClassesToSkip__c=' + this.triggerSettings.HandlerClassesToSkip__c);
+
+        // If ExecuteTriggers == true and the current class isn't in the list of handlers to skip, then execute
+        return this.triggerSettings.ExecuteTriggers__c && !handlerClassesToSkip.contains(this.className.toLowerCase());
     }
 
     private void setHashCode() {
@@ -110,5 +158,7 @@ public abstract class TriggerHandler {
             return true;
         }
     }
+
+    private class TriggerHandlerException extends Exception {}
 
 }
