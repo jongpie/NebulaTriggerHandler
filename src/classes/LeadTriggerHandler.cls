@@ -21,7 +21,7 @@ public without sharing class LeadTriggerHandler extends TriggerHandler {
 
     private void setStatus(Lead updatedLead, Lead oldLead) {
         // Add logic here. Methods can be overloaded to handle updates & inserts
-        if(updatedLead.Source != oldLead.Source) {
+        if(updatedLead.LeadSource != oldLead.LeadSource) {
             this.setStatus(updatedLead);
         }
     }

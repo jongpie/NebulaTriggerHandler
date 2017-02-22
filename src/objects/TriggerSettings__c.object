@@ -10,6 +10,17 @@
         <trackTrending>false</trackTrending>
         <type>Checkbox</type>
     </fields>
+    <fields>
+        <fullName>HandlerClassesToSkip__c</fullName>
+        <externalId>false</externalId>
+        <inlineHelpText>Enter any handler classes that should be skipped (1 per line). For example:
+LeadTriggerHandler
+TaskTriggerHandler</inlineHelpText>
+        <label>Handler Classes to Skip</label>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>TextArea</type>
+    </fields>
     <label>Trigger Settings</label>
     <visibility>Protected</visibility>
 </CustomObject>
