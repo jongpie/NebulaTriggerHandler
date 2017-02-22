@@ -44,22 +44,22 @@ public abstract class TriggerHandler {
             return;
         } else this.addDebugStatement('Records have not been processed for this context, continuing');
 
-        if(this.context == TriggerContext.BEFORE_INSERT) this.beforeInsert(Trigger.new);
-        else if(this.context == TriggerContext.BEFORE_UPDATE) this.beforeUpdate(Trigger.new, Trigger.newMap, Trigger.old, Trigger.oldMap);
-        else if(this.context == TriggerContext.BEFORE_DELETE) this.beforeDelete(Trigger.old, Trigger.oldMap);
-        else if(this.context == TriggerContext.AFTER_INSERT) this.afterInsert(Trigger.new, Trigger.newMap);
-        else if(this.context == TriggerContext.AFTER_UPDATE) this.afterUpdate(Trigger.new, Trigger.newMap, Trigger.old, Trigger.oldMap);
-        else if(this.context == TriggerContext.AFTER_DELETE) this.afterDelete(Trigger.old, Trigger.oldMap);
-        else if(this.context == TriggerContext.AFTER_UNDELETE) this.afterUndelete(Trigger.new, Trigger.newMap);
+        if(this.context == TriggerContext.BEFORE_INSERT) this.executeBeforeInsert(Trigger.new);
+        else if(this.context == TriggerContext.BEFORE_UPDATE) this.executeBeforeUpdate(Trigger.new, Trigger.newMap, Trigger.old, Trigger.oldMap);
+        else if(this.context == TriggerContext.BEFORE_DELETE) this.executeBeforeDelete(Trigger.old, Trigger.oldMap);
+        else if(this.context == TriggerContext.AFTER_INSERT) this.executeAfterInsert(Trigger.new, Trigger.newMap);
+        else if(this.context == TriggerContext.AFTER_UPDATE) this.executeAfterUpdate(Trigger.new, Trigger.newMap, Trigger.old, Trigger.oldMap);
+        else if(this.context == TriggerContext.AFTER_DELETE) this.executeAfterDelete(Trigger.old, Trigger.oldMap);
+        else if(this.context == TriggerContext.AFTER_UNDELETE) this.executeAfterUndelete(Trigger.new, Trigger.newMap);
     }
 
-    protected virtual void beforeInsert(List<SObject> newRecordList) {}
-    protected virtual void beforeUpdate(List<SObject> updatedRecordList, Map<Id, SObject> updatedRecordMap, List<SObject> oldRecordList, Map<Id, SObject> oldRecordMap) {}
-    protected virtual void beforeDelete(List<SObject> deletedRecordList, Map<Id, SObject> deletedRecordMap) {}
-    protected virtual void afterInsert(List<SObject> newRecordList, Map<Id, SObject> newRecordMap) {}
-    protected virtual void afterUpdate(List<SObject> updatedRecordList, Map<Id, SObject> updatedRecordMap, List<SObject> oldRecordList, Map<Id, SObject> oldRecordMap) {}
-    protected virtual void afterDelete(List<SObject> deletedRecordList, Map<Id, SObject> deletedRecordMap) {}
-    protected virtual void afterUndelete(List<SObject> undeletedRecordList, Map<Id, SObject> undeletedRecordMap) {}
+    protected virtual void executeBeforeInsert(List<SObject> newRecordList) {}
+    protected virtual void executeBeforeUpdate(List<SObject> updatedRecordList, Map<Id, SObject> updatedRecordMap, List<SObject> oldRecordList, Map<Id, SObject> oldRecordMap) {}
+    protected virtual void executeBeforeDelete(List<SObject> deletedRecordList, Map<Id, SObject> deletedRecordMap) {}
+    protected virtual void executeAfterInsert(List<SObject> newRecordList, Map<Id, SObject> newRecordMap) {}
+    protected virtual void executeAfterUpdate(List<SObject> updatedRecordList, Map<Id, SObject> updatedRecordMap, List<SObject> oldRecordList, Map<Id, SObject> oldRecordMap) {}
+    protected virtual void executeAfterDelete(List<SObject> deletedRecordList, Map<Id, SObject> deletedRecordMap) {}
+    protected virtual void executeAfterUndelete(List<SObject> undeletedRecordList, Map<Id, SObject> undeletedRecordMap) {}
 
     private String getClassName() {
         return String.valueOf(this).split(':')[0];
