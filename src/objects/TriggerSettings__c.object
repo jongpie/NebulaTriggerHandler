@@ -3,6 +3,15 @@
     <customSettingsType>Hierarchy</customSettingsType>
     <enableFeeds>false</enableFeeds>
     <fields>
+        <fullName>EnableDebugging__c</fullName>
+        <defaultValue>true</defaultValue>
+        <externalId>false</externalId>
+        <inlineHelpText>Controls if debug statements from TriggerHandler are shown in the logs</inlineHelpText>
+        <label>Enable Debugging</label>
+        <trackTrending>false</trackTrending>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
         <fullName>ExecuteTriggers__c</fullName>
         <defaultValue>true</defaultValue>
         <externalId>false</externalId>

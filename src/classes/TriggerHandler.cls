@@ -10,36 +10,39 @@ public abstract class TriggerHandler {
 
     private Integer hashCode; // The hash code for the current records
     private Boolean isTriggerExecuting; // Checks if the code was called by a trigger
+    private TriggerSettings__c triggerSettings;
 
     protected TriggerHandler() {
-        System.debug('Initializing ' + this.getClassName());
+        this.triggerSettings = this.getTriggerSettings();
+
+        this.addDebugStatement('Initializing ' + this.getClassName());
         this.setTriggerContext();
         this.validateTriggerContext();
         this.setHashCode();
     }
 
     public void execute() {
-        System.debug('Execute method called for ' + this.getClassName());
+        this.addDebugStatement('Execute method called for ' + this.getClassName());
         // Check the custom setting. If it's disabled, stop everything, show's over
         // You don't have to go home but you can't stay here
         if(!shouldExecuteTriggers()) {
-            System.debug('Skipping execution of class ' + this.getClassName());
+            this.addDebugStatement('Skipping execution of class ' + this.getClassName());
             return;
         }
 
-        System.debug(this.getClassName() + ' is enabled, proceeding with execution');
+        this.addDebugStatement(this.getClassName() + ' is enabled, proceeding with execution');
 
         String sobjectType = Trigger.new == null ? String.valueOf(Trigger.old.getSObjectType()) : String.valueOf(Trigger.new.getSObjectType());
-        System.debug('Starting execute method for: ' + sobjectType);
-        System.debug('Hash codes already processed: ' + TriggerHandler.hashCodesForProcessedRecords);
-        System.debug('Hash code for current records: ' + this.hashCode);
-        System.debug('Trigger context for current records: ' + this.context);
-        System.debug('Number of current records: ' + Trigger.size);
+        this.addDebugStatement('Starting execute method for: ' + sobjectType);
+        this.addDebugStatement('Hash codes already processed: ' + TriggerHandler.hashCodesForProcessedRecords);
+        this.addDebugStatement('Hash code for current records: ' + this.hashCode);
+        this.addDebugStatement('Trigger context for current records: ' + this.context);
+        this.addDebugStatement('Number of current records: ' + Trigger.size);
 
         if(this.haveRecordsAlreadyBeenProcessed()) {
-            System.debug('Records already processed for this context, skipping');
+            this.addDebugStatement('Records already processed for this context, skipping');
             return;
-        } else System.debug('Records have not been processed for this context, continuing');
+        } else this.addDebugStatement('Records have not been processed for this context, continuing');
 
         if(this.context == TriggerContext.BEFORE_INSERT) this.beforeInsert(Trigger.new);
         else if(this.context == TriggerContext.BEFORE_UPDATE) this.beforeUpdate(Trigger.new, Trigger.newMap, Trigger.old, Trigger.oldMap);
@@ -62,6 +65,26 @@ public abstract class TriggerHandler {
         return String.valueOf(this).split(':')[0];
     }
 
+    private TriggerSettings__c getTriggerSettings() {
+        TriggerSettings__c triggerSettings = TriggerSettings__c.getInstance();
+
+        if(triggerSettings.Id == null) {
+            // If there's no ID, then there are settings setup for the current user at the user, profile or org level
+            // Upsert the org defaults - the default field values will be used
+            upsert TriggerSettings__c.getOrgDefaults();
+            // Call getInstance() again to get the settings with the field defaults
+            triggerSettings = TriggerSettings__c.getInstance();
+        }
+
+        return triggerSettings;
+    }
+
+    private void addDebugStatement(String debugStatement) {
+        if(!this.triggerSettings.EnableDebugging__c) return;
+
+        System.debug(debugStatement);
+    }
+
     private void setTriggerContext() {
         this.isTriggerExecuting = Trigger.isExecuting;
 
@@ -81,23 +104,13 @@ public abstract class TriggerHandler {
     }
 
     private Boolean shouldExecuteTriggers() {
-        TriggerSettings__c triggerSettings = TriggerSettings__c.getInstance();
+        this.addDebugStatement('triggerSettings.ExecuteTriggers__c=' + this.triggerSettings.ExecuteTriggers__c);
 
-        if(triggerSettings.Id == null) {
-            // If there's no ID, then there are settings setup for the current user at the user, profile or org level
-            // Upsert the org defaults - the default field values will be used
-            upsert TriggerSettings__c.getOrgDefaults();
-            // Call getInstance() again to get the settings with the field defaults
-            triggerSettings = TriggerSettings__c.getInstance();
-        }
-
-        System.debug('triggerSettings.ExecuteTriggers__c=' + triggerSettings.ExecuteTriggers__c);
-
-        Set<String> handlerClassesToSkip = new Set<String>(triggerSettings.HandlerClassesToSkip__c.toLowerCase().split('\n'));
-        System.debug('triggerSettings.HandlerClassesToSkip__c=' + triggerSettings.HandlerClassesToSkip__c);
+        Set<String> handlerClassesToSkip = new Set<String>(this.triggerSettings.HandlerClassesToSkip__c.toLowerCase().split('\n'));
+        this.addDebugStatement('triggerSettings.HandlerClassesToSkip__c=' + this.triggerSettings.HandlerClassesToSkip__c);
 
         // If ExecuteTriggers == true and the current class isn't in the list of handlers to skip, then execute
-        return triggerSettings.ExecuteTriggers__c && !handlerClassesToSkip.contains(this.getClassName().toLowerCase());
+        return this.triggerSettings.ExecuteTriggers__c && !handlerClassesToSkip.contains(this.getClassName().toLowerCase());
     }
 
     private void setHashCode() {
