@@ -8,29 +8,31 @@ public abstract class TriggerHandler {
     }
     public TriggerContext context; // The current context of the trigger
 
+    private String className;
     private Integer hashCode; // The hash code for the current records
     private Boolean isTriggerExecuting; // Checks if the code was called by a trigger
     private TriggerSettings__c triggerSettings;
 
     protected TriggerHandler() {
-        this.triggerSettings = this.getTriggerSettings();
+        this.getClassName();
+        this.getTriggerSettings();
 
-        this.addDebugStatement('Initializing ' + this.getClassName());
+        this.addDebugStatement('Initializing ' + this.className);
         this.setTriggerContext();
         this.validateTriggerContext();
         this.setHashCode();
     }
 
     public void execute() {
-        this.addDebugStatement('Execute method called for ' + this.getClassName());
+        this.addDebugStatement('Execute method called for ' + this.className);
         // Check the custom setting. If it's disabled, stop everything, show's over
         // You don't have to go home but you can't stay here
         if(!shouldExecuteTriggers()) {
-            this.addDebugStatement('Skipping execution of class ' + this.getClassName());
+            this.addDebugStatement('Skipping execution of class ' + this.className);
             return;
         }
 
-        this.addDebugStatement(this.getClassName() + ' is enabled, proceeding with execution');
+        this.addDebugStatement(this.className + ' is enabled, proceeding with execution');
 
         String sobjectType = Trigger.new == null ? String.valueOf(Trigger.old.getSObjectType()) : String.valueOf(Trigger.new.getSObjectType());
         this.addDebugStatement('Starting execute method for: ' + sobjectType);
@@ -61,22 +63,20 @@ public abstract class TriggerHandler {
     protected virtual void executeAfterDelete(List<SObject> deletedRecordList, Map<Id, SObject> deletedRecordMap) {}
     protected virtual void executeAfterUndelete(List<SObject> undeletedRecordList, Map<Id, SObject> undeletedRecordMap) {}
 
-    private String getClassName() {
-        return String.valueOf(this).split(':')[0];
+    private void getClassName() {
+        this.className = String.valueOf(this).split(':')[0];
     }
 
-    private TriggerSettings__c getTriggerSettings() {
-        TriggerSettings__c triggerSettings = TriggerSettings__c.getInstance();
+    private void getTriggerSettings() {
+        this.triggerSettings = TriggerSettings__c.getInstance();
 
-        if(triggerSettings.Id == null) {
+        if(this.triggerSettings.Id == null) {
             // If there's no ID, then there are settings setup for the current user at the user, profile or org level
             // Upsert the org defaults - the default field values will be used
             upsert TriggerSettings__c.getOrgDefaults();
             // Call getInstance() again to get the settings with the field defaults
-            triggerSettings = TriggerSettings__c.getInstance();
+            this.triggerSettings = TriggerSettings__c.getInstance();
         }
-
-        return triggerSettings;
     }
 
     private void addDebugStatement(String debugStatement) {
@@ -106,11 +106,13 @@ public abstract class TriggerHandler {
     private Boolean shouldExecuteTriggers() {
         this.addDebugStatement('triggerSettings.ExecuteTriggers__c=' + this.triggerSettings.ExecuteTriggers__c);
 
-        Set<String> handlerClassesToSkip = new Set<String>(this.triggerSettings.HandlerClassesToSkip__c.toLowerCase().split('\n'));
+        String handlerClassesToSkipString = this.triggerSettings.HandlerClassesToSkip__c;
+        if(handlerClassesToSkipString == null) handlerClassesToSkipString = '';
+        Set<String> handlerClassesToSkip = new Set<String>(handlerClassesToSkipString.toLowerCase().split('\n'));
         this.addDebugStatement('triggerSettings.HandlerClassesToSkip__c=' + this.triggerSettings.HandlerClassesToSkip__c);
 
         // If ExecuteTriggers == true and the current class isn't in the list of handlers to skip, then execute
-        return this.triggerSettings.ExecuteTriggers__c && !handlerClassesToSkip.contains(this.getClassName().toLowerCase());
+        return this.triggerSettings.ExecuteTriggers__c && !handlerClassesToSkip.contains(this.className.toLowerCase());
     }
 
     private void setHashCode() {
