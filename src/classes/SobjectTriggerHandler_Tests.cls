@@ -6,6 +6,7 @@ private class SobjectTriggerHandler_Tests {
         public LeadTriggerHandlerTest() {
             super(true);
         }
+
         public override void executeBeforeInsert(List<Sobject> newRecordList) {
             List<Lead> newLeadList = (List<Lead>)this.recordList;
 
