@@ -72,6 +72,15 @@ public abstract class SobjectTriggerHandler implements ISobjectTriggerHandler {
     protected virtual void executeAfterDelete(List<Sobject> deletedRecordList, Map<Id, Sobject> deletedRecordMap) {}
     protected virtual void executeAfterUndelete(List<Sobject> undeletedRecordList, Map<Id, Sobject> undeletedRecordMap) {}
 
+    private SobjectTriggerHandlerSettings__c getSettings() {
+        SobjectTriggerHandlerSettings__c triggerHandlerSettings = SobjectTriggerHandlerSettings__c.getInstance();
+
+        if(triggerHandlerSettings.Id != null) return triggerHandlerSettings;
+
+        upsert SobjectTriggerHandlerSettings__c.getOrgDefaults();
+        return SobjectTriggerHandlerSettings__c.getInstance();
+    }
+
     private void validateTriggerContext() {
         if(this.isTestMode) return;
 
@@ -91,18 +100,16 @@ public abstract class SobjectTriggerHandler implements ISobjectTriggerHandler {
     }
 
     private Boolean shouldExecuteTriggers() {
-        TriggerHandlerSettings__c triggerSettings = TriggerHandlerSettings__c.getInstance();
-
-        String handlerClassesToSkipString = triggerSettings.HandlerClassesToSkip__c;
+        String handlerClassesToSkipString = this.getSettings().HandlerClassesToSkip__c;
         if(handlerClassesToSkipString == null) handlerClassesToSkipString = '';
         Set<String> handlerClassesToSkip = new Set<String>(handlerClassesToSkipString.toLowerCase().split('\n'));
 
         // If ExecuteTriggers == true and the current class isn't in the list of handlers to skip, then execute
-        return TriggerHandlerSettings__c.getInstance().ExecuteTriggers__c && !handlerClassesToSkip.contains(this.getClassName().toLowerCase());
+        return this.getSettings().ExecuteTriggers__c && !handlerClassesToSkip.contains(this.getClassName().toLowerCase());
     }
 
     private void setHashCode() {
-        if(!TriggerHandlerSettings__c.getInstance().PreventRecursion__c) return;
+        if(!this.getSettings().PreventRecursion__c) return;
 
         List<Sobject> recordToParseList;
         if(this.isTestMode) recordToParseList = this.recordList;
@@ -133,7 +140,7 @@ public abstract class SobjectTriggerHandler implements ISobjectTriggerHandler {
     }
 
     private Boolean haveRecordsAlreadyBeenProcessed() {
-        if(!TriggerHandlerSettings__c.getInstance().PreventRecursion__c) return false;
+        if(!this.getSettings().PreventRecursion__c) return false;
 
         // This method is a safeguard that checks to see if we have recursion problems and stops if we do
         // It allows each context to occur once for a given hash code

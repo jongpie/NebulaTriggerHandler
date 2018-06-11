@@ -30,7 +30,7 @@ private class SobjectTriggerHandler_Tests {
 
     @testSetup
     static void setupData() {
-        upsert TriggerHandlerSettings__c.getInstance();
+        upsert SobjectTriggerHandlerSettings__c.getInstance();
 
         for(Integer i = 0; i < 5; i++) {
             Lead lead = (Lead)new TestDataFactory(new Lead()).populateRequiredFields();
@@ -41,7 +41,7 @@ private class SobjectTriggerHandler_Tests {
 
     @isTest
     static void it_should_not_execute_triggers_when_disabled() {
-        TriggerHandlerSettings__c triggerHandlerSettings = TriggerHandlerSettings__c.getInstance();
+        SobjectTriggerHandlerSettings__c triggerHandlerSettings = SobjectTriggerHandlerSettings__c.getInstance();
         triggerHandlerSettings.ExecuteTriggers__c = false;
         upsert triggerHandlerSettings;
 
