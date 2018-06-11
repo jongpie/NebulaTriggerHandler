@@ -1,6 +1,8 @@
 # Nebula Trigger Framework
+[![Travis CI](https://img.shields.io/travis/jongpie/NebulaTriggerFramework/master.svg)](https://travis-ci.org/jongpie/NebulaTriggerFramework)
+
 <a target="_blank" href="https://githubsfdeploy.herokuapp.com">
-  <img alt="Deploy to Salesforce" src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/src/main/webapp/resources/img/deploy.png">
+    <img alt="Deploy to Salesforce" src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/src/main/webapp/resources/img/deploy.png">
 </a>
 
 ## Features
