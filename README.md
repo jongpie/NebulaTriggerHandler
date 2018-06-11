@@ -1,5 +1,5 @@
-# Apex Trigger Framework
-<a target="_blank" href="https://githubsfdeploy.herokuapp.com?owner=jongpie&repo=ApexTriggerFramework">
+# Nebula Trigger Framework
+<a target="_blank" href="https://githubsfdeploy.herokuapp.com">
   <img alt="Deploy to Salesforce" src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/src/main/webapp/resources/img/deploy.png">
 </a>
 
@@ -10,6 +10,3 @@
 * Allows triggers to be enabled/disabled both globally and individually at the org, profile and user levels (hierarchy custom setting)
 * Allows framework debug statements to be enabled/disabled
 * Recursion prevention: in the event that there is a recursive loop, each handler detects that it has already processed the records and skips duplicated execution
-
-
-### Example Implementation: LeadTriggerHandler.cls
