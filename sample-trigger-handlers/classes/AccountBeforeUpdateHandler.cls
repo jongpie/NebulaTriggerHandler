@@ -8,10 +8,6 @@ public with sharing class AccountBeforeUpdateHandler extends TriggerOperationHan
         return Schema.Account.SObjectType;
     }
 
-    // public override System.TriggerOperation getTriggerOperation() {
-    //     return System.TriggerOperation.BEFORE_Update;
-    // }
-
     public override void executeBeforeUpdate(List<SObject> updatedRecordList, Map<Id, SObject> updatedRecordMap, List<SObject> oldRecordList, Map<Id, SObject> oldRecordMap) {
         System.debug('running in a before Update context for account');
         System.debug('updatedRecordList = ' + updatedRecordList);
