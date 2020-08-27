@@ -3,9 +3,6 @@
         {
             "path": "nebula-app-framework",
             "default": true
-        },
-        {
-            "path": "sample-trigger-handlers"
         }
     ],
     "namespace": "Nebula",
