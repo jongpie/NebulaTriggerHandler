@@ -2,22 +2,25 @@
 * This file is part of the Nebula Trigger Handler project, released under the MIT License.       *
 * See LICENSE file or go to https://github.com/jongpie/NebulaFramework for full license details. *
 *************************************************************************************************/
-public abstract class TriggerHandler implements ITriggerHandler {
+public abstract class TriggerHandler {
 
     public class TriggerHandlerException extends Exception {}
 
     // Interfaces used by the trigger framework
     public interface ITriggerSObjectHandler {
+        Schema.SObjectType getSObjectType();
         void execute();
     }
 
     public interface ITriggerFilteredSObjectHandler {
+        Schema.SObjectType getSObjectType();
         String getFieldName();
         Object getFieldValue();
         void execute();
     }
 
     public interface ITriggerOperationHandler {
+        Schema.SObjectType getSObjectType();
         List<System.TriggerOperation> getTriggerOperations();
         void execute();
     }
