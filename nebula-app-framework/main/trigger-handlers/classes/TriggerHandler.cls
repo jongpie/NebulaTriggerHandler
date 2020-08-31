@@ -14,7 +14,7 @@ public abstract class TriggerHandler {
 
     public interface ITriggerFilteredSObjectHandler {
         Schema.SObjectType getSObjectType();
-        String getFieldName();
+        Schema.SObjectField getField();
         Object getFieldValue();
         void execute();
     }
@@ -26,6 +26,10 @@ public abstract class TriggerHandler {
     }
 
     @testVisible
+    protected System.TriggerOperation currentOperation;
+    @testVisible
+    protected Boolean isTestMode;
+    @testVisible
     protected Boolean isTriggerExecuting;
     @testVisible
     protected List<SObject> newRecordList, oldRecordList;
@@ -33,7 +37,9 @@ public abstract class TriggerHandler {
     protected Map<Id, SObject> newRecordMap, oldRecordMap;
 
     public TriggerHandler() {
+        this.currentOperation   = Trigger.operationType;
         this.isTriggerExecuting = Trigger.isExecuting;
+        this.isTestMode         = false;
         this.newRecordList      = Trigger.new;
         this.newRecordMap       = Trigger.newMap;
         this.oldRecordList      = Trigger.old;
@@ -53,7 +59,7 @@ public abstract class TriggerHandler {
 
     protected void executeTriggerOperationMethod() {
         // Run the corresonding execute method
-        switch on Trigger.operationType {
+        switch on this.currentOperation {
             when BEFORE_INSERT  { this.executeBeforeInsert(this.newRecordList); }
             when BEFORE_UPDATE  { this.executeBeforeUpdate(this.newRecordList, this.newRecordMap, this.oldRecordList, this.oldRecordMap); }
             when BEFORE_DELETE  { this.executeBeforeDelete(this.oldRecordList, this.oldRecordMap); }
@@ -62,40 +68,6 @@ public abstract class TriggerHandler {
             when AFTER_DELETE   { this.executeAfterDelete(this.oldRecordList, this.oldRecordMap); }
             when AFTER_UNDELETE { this.executeAfterUndelete(this.newRecordList, this.newRecordMap); }
         }
-    }
-
-    protected void filterRecordsByFieldValue(Schema.SObjectField field, Object fieldValue) {
-        this.filterRecordsByFieldValue(field.getDescribe().getName(), fieldValue);
-    }
-
-    protected void filterRecordsByFieldValue(String fieldName, Object fieldValue) {
-        this.newRecordList = filterListByFieldValue(this.newRecordList, fieldName, fieldValue);
-        this.newRecordMap  = filterMapByFieldValue(this.newRecordMap, fieldName, fieldValue);
-        this.oldRecordList = filterListByFieldValue(this.oldRecordList, fieldName, fieldValue);
-        this.oldRecordMap  = filterMapByFieldValue(this.oldRecordMap, fieldName, fieldValue);
-    }
-
-    private Map<Id, SObject> filterMapByFieldValue(Map<Id, SObject> recordList, Schema.SObjectField field, Object fieldValue) {
-        return new Map<Id, SObject>(this.filterMapByFieldValue(recordList, field.getDescribe().getName(), fieldValue));
-    }
-
-    private Map<Id, SObject> filterMapByFieldValue(Map<Id, SObject> recordList, String fieldName, Object fieldValue) {
-        return new Map<Id, SObject>(this.filterMapByFieldValue(recordList, fieldName, fieldValue));
-    }
-
-    private List<SObject> filterListByFieldValue(List<SObject> recordList, Schema.SObjectField field, Object fieldValue) {
-        return filterListByFieldValue(recordList, field.getDescribe().getName(), fieldValue);
-    }
-
-    private List<SObject> filterListByFieldValue(List<SObject> recordList, String fieldName, Object fieldValue) {
-        if(recordList == null) return null;
-
-        List<SObject> filteredRecords = new List<SObject>();
-        for(SObject record : recordList) {
-            if(record.get(fieldName) == fieldValue) filteredRecords.add(record);
-        }
-
-        return filteredRecords;
     }
 
 }
