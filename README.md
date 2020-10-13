@@ -1,5 +1,6 @@
-# Nebula Trigger Framework
+# Nebula Trigger Handler Framework
 [![Travis CI](https://img.shields.io/travis/jongpie/NebulaTriggerFramework/master.svg)](https://travis-ci.org/jongpie/NebulaTriggerFramework)
+[![Maintainability](https://api.codeclimate.com/v1/badges/bf9f4d9d5d791618786d/maintainability)](https://codeclimate.com/github/jongpie/NebulaTriggerHandler/maintainability)
 
 <a href="https://githubsfdeploy.herokuapp.com" target="_blank">
     <img alt="Deploy to Salesforce" src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png">
