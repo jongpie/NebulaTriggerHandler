@@ -8,10 +8,10 @@ public abstract class TriggerFilteredSObjectHandler extends TriggerSObjectHandle
     public abstract Object getFieldValue();
 
     public void filterRecords() {
-        this.newRecordList = filterListByFieldValue(this.newRecordList, this.getField(), this.getFieldValue());
-        this.newRecordMap  = filterMapByFieldValue(this.newRecordMap, this.getField(), this.getFieldValue());
-        this.oldRecordList = filterListByFieldValue(this.oldRecordList, this.getField(), this.getFieldValue());
-        this.oldRecordMap  = filterMapByFieldValue(this.oldRecordMap, this.getField(), this.getFieldValue());
+        super.newRecordList = filterListByFieldValue(super.newRecordList, this.getField(), this.getFieldValue());
+        super.newRecordMap  = filterMapByFieldValue(super.newRecordMap, this.getField(), this.getFieldValue());
+        super.oldRecordList = filterListByFieldValue(super.oldRecordList, this.getField(), this.getFieldValue());
+        super.oldRecordMap  = filterMapByFieldValue(super.oldRecordMap, this.getField(), this.getFieldValue());
     }
 
     private Map<Id, SObject> filterMapByFieldValue(Map<Id, SObject> recordMap, Schema.SObjectField field, Object fieldValue) {

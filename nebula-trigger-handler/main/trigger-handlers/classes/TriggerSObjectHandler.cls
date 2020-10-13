@@ -44,7 +44,7 @@ public abstract class TriggerSObjectHandler extends TriggerHandler implements Tr
             System.debug(LoggingLevel.FINEST, 'Records have not been processed for this context, continuing');
         }
 
-        this.executeTriggerOperationMethod();
+        super.executeTriggerOperationMethod();
 
         // Run any additional trigger operation handlers & record type handlers
         this.executeTriggerOperationHandlers();
@@ -91,17 +91,17 @@ public abstract class TriggerSObjectHandler extends TriggerHandler implements Tr
     }
 
     private void validateTriggerContext() {
-        if(this.isTestMode) return;
+        if(super.isTestMode) return;
 
-        String errorMessage = 'Trigger handler called outside of trigger execution ' + this.isTriggerExecuting;
+        String errorMessage = 'Trigger handler called outside of trigger execution ' + super.isTriggerExecuting;
         if(!this.isTriggerExecuting) throw new TriggerHandler.TriggerHandlerException(errorMessage);
     }
 
     private void setTriggerRecords() {
-        this.newRecordList = this.isTestMode ? this.newRecordList : Trigger.new;
-        this.newRecordMap  = this.isTestMode ? this.newRecordMap  : Trigger.newMap;
-        this.oldRecordList = this.isTestMode ? this.oldRecordList : Trigger.old;
-        this.oldRecordMap  = this.isTestMode ? this.oldRecordMap  : Trigger.oldMap;
+        super.newRecordList = super.isTestMode ? super.newRecordList : Trigger.new;
+        super.newRecordMap  = super.isTestMode ? super.newRecordMap  : Trigger.newMap;
+        super.oldRecordList = super.isTestMode ? super.oldRecordList : Trigger.old;
+        super.oldRecordMap  = super.isTestMode ? super.oldRecordMap  : Trigger.oldMap;
     }
 
     private Boolean shouldExecuteTriggers() {

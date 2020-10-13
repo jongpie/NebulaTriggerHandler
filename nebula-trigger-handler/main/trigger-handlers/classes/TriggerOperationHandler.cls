@@ -9,17 +9,17 @@ public abstract class TriggerOperationHandler extends TriggerHandler implements 
     public abstract List<System.TriggerOperation> getTriggerOperations();
 
     public override void execute() {
-        this.executeTriggerOperationMethod();
+        super.executeTriggerOperationMethod();
     }
 
     public void setTriggerNew(List<SObject> newRecordList, Map<Id, SObject> newRecordMap) {
-        this.newRecordList = newRecordList;
-        this.newRecordMap  = newRecordMap;
+        super.newRecordList = newRecordList;
+        super.newRecordMap  = newRecordMap;
     }
 
     public void setTriggerOld(List<SObject> oldRecordList, Map<Id, SObject> oldRecordMap) {
-        this.oldRecordList = oldRecordList;
-        this.oldRecordMap  = oldRecordMap;
+        super.oldRecordList = oldRecordList;
+        super.oldRecordMap  = oldRecordMap;
     }
 
     public interface IBeforeInsert {
