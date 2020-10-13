@@ -5,14 +5,15 @@
 @isTest
 private class TriggerOperationHandler_Tests {
 
-    public class AccountBeforeInsertHandler extends SObjectTriggerOperationHandler.SObjectBeforeInsertHandler {
+    public class UserBeforeInsertHandler extends TriggerOperationHandler.BeforeInsertHandler {
 
         public override Schema.SObjectType getSObjectType() {
-            return Schema.Account.SObjectType;
+            return Schema.User.SObjectType;
         }
 
-        public override void execute() {
+        public override void executeBeforeInsert(List<SObject> newRecords) {
             System.debug('running in a before insert context for account');
+            System.debug('newRecords = ' + newRecords);
         }
 
     }
