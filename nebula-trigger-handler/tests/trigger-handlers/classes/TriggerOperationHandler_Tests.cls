@@ -142,6 +142,11 @@ private class TriggerOperationHandler_Tests {
     }
 
     // Start of the actual test methods
+    @testSetup
+    static void setupData() {
+        insert TriggerHandlerSettings__c.getInstance();
+    }
+
     @isTest
     static void it_should_return_insert_trigger_operations_from_insertHandler() {
         UserInsertHandler userInsertHandler = new UserInsertHandler();

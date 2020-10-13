@@ -105,6 +105,11 @@ public abstract class TriggerSObjectHandler extends TriggerHandler implements Tr
     }
 
     private Boolean shouldExecuteTriggers() {
+        // Don't execute if there aren't any records to process
+        Boolean newRecordsPresent = super.newRecordList != null && super.newRecordList.size() > 0;
+        Boolean oldRecordsPresent = super.oldRecordList != null && super.oldRecordList.size() > 0;
+        if(!newRecordsPresent && !oldRecordsPresent) return false;
+
         System.debug(LoggingLevel.FINEST, 'TriggerHandlerSettings__c.getInstance().ExecuteTriggers__c=' + TriggerHandlerSettings__c.getInstance().ExecuteTriggers__c);
 
         String handlerClassesToSkipString = TriggerHandlerSettings__c.getInstance().HandlerClassesToSkip__c;
