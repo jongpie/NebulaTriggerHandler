@@ -105,13 +105,13 @@ public abstract class TriggerSObjectHandler extends TriggerHandler implements Tr
     }
 
     private Boolean shouldExecuteTriggers() {
-        Logger.finest('TriggerHandlerSettings__c.getInstance().ExecuteTriggers__c=' + TriggerHandlerSettings__c.getInstance().ExecuteTriggers__c);
+        System.debug(LoggingLevel.FINEST, 'TriggerHandlerSettings__c.getInstance().ExecuteTriggers__c=' + TriggerHandlerSettings__c.getInstance().ExecuteTriggers__c);
 
         String handlerClassesToSkipString = TriggerHandlerSettings__c.getInstance().HandlerClassesToSkip__c;
         if(handlerClassesToSkipString == null) handlerClassesToSkipString = '';
 
         Set<String> handlerClassesToSkip = new Set<String>(handlerClassesToSkipString.toLowerCase().split('\n'));
-        Logger.finest('TriggerHandlerSettings__c.getInstance().HandlerClassesToSkip__c=' + TriggerHandlerSettings__c.getInstance().HandlerClassesToSkip__c);
+        System.debug(LoggingLevel.FINEST, 'TriggerHandlerSettings__c.getInstance().HandlerClassesToSkip__c=' + TriggerHandlerSettings__c.getInstance().HandlerClassesToSkip__c);
 
         // If ExecuteTriggers == true and the current class isn't in the list of handlers to skip, then execute
         return TriggerHandlerSettings__c.getInstance().ExecuteTriggers__c && !handlerClassesToSkip.contains(this.getHandlerName().toLowerCase());
