@@ -1,7 +1,7 @@
-/*************************************************************************************************
-* This file is part of the Nebula Trigger Handler project, released under the MIT License.       *
-* See LICENSE file or go to https://github.com/jongpie/NebulaFramework for full license details. *
-*************************************************************************************************/
+/******************************************************************************************************
+* This file is part of the Nebula Trigger Handler project, released under the MIT License.            *
+* See LICENSE file or go to https://github.com/jongpie/NebulaTriggerHandler for full license details. *
+******************************************************************************************************/
 public abstract class TriggerOperationHandler extends TriggerHandler implements TriggerHandler.ITriggerOperationHandler {
 
     // Abstract methods

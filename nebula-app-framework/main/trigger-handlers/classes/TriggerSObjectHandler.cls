@@ -1,7 +1,7 @@
-/*************************************************************************************************
-* This file is part of the Nebula Trigger Handler project, released under the MIT License.       *
-* See LICENSE file or go to https://github.com/jongpie/NebulaFramework for full license details. *
-*************************************************************************************************/
+/******************************************************************************************************
+* This file is part of the Nebula Trigger Handler project, released under the MIT License.            *
+* See LICENSE file or go to https://github.com/jongpie/NebulaTriggerHandler for full license details. *
+******************************************************************************************************/
 public abstract class TriggerSObjectHandler extends TriggerHandler implements TriggerHandler.ITriggerSObjectHandler {
 
     // Static variables
@@ -16,32 +16,32 @@ public abstract class TriggerSObjectHandler extends TriggerHandler implements Tr
     public override abstract Schema.SObjectType getSObjectType();
 
     public override void execute() {
-        Logger.finest('Execute method called');
+        System.debug(LoggingLevel.FINEST, 'Execute method called');
 
         this.validateTriggerContext();
 
         // Check the custom setting. If it's disabled, stop everything
         if(!shouldExecuteTriggers()) {
-            Logger.finest('Skipping execution of class');
+            System.debug(LoggingLevel.FINEST, 'Skipping execution of class');
             return;
         }
 
-        Logger.finest('Handler is enabled, proceeding with execution');
+        System.debug(LoggingLevel.FINEST, 'Handler is enabled, proceeding with execution');
 
         this.setTriggerRecords();
         this.setHashCode();
 
-        Logger.finest('Starting execute method for: ' + this.getSObjectType());
-        Logger.finest('Trigger context for current records: ' + this.currentOperation);
-        Logger.finest('Hash codes already processed: ' + hashCodesForProcessedRecords);
-        Logger.finest('Hash code for current records: ' + this.hashCode);
-        Logger.finest('Number of current records: ' + Trigger.size);
+        System.debug(LoggingLevel.FINEST, 'Starting execute method for: ' + this.getSObjectType());
+        System.debug(LoggingLevel.FINEST, 'Trigger context for current records: ' + this.currentOperation);
+        System.debug(LoggingLevel.FINEST, 'Hash codes already processed: ' + hashCodesForProcessedRecords);
+        System.debug(LoggingLevel.FINEST, 'Hash code for current records: ' + this.hashCode);
+        System.debug(LoggingLevel.FINEST, 'Number of current records: ' + Trigger.size);
 
         if(this.haveRecordsAlreadyBeenProcessed()) {
-            Logger.finest('Records already processed for this context, skipping');
+            System.debug(LoggingLevel.FINEST, 'Records already processed for this context, skipping');
             return;
         } else {
-            Logger.finest('Records have not been processed for this context, continuing');
+            System.debug(LoggingLevel.FINEST, 'Records have not been processed for this context, continuing');
         }
 
         this.executeTriggerOperationMethod();
@@ -49,8 +49,6 @@ public abstract class TriggerSObjectHandler extends TriggerHandler implements Tr
         // Run any additional trigger operation handlers & record type handlers
         this.executeTriggerOperationHandlers();
         this.executeFilteredSObjectHandlers();
-
-        if(Trigger.isAfter) Logger.saveLog();
     }
 
     // Protected methods

@@ -3,9 +3,9 @@
 * See LICENSE file or go to https://github.com/jongpie/NebulaTriggerHandler for full license details. *
 ******************************************************************************************************/
 @isTest
-private class TriggerSObjectHandler_Tests {
+private class TriggerHandler_Tests {
 
-    private class UserTriggerHandlerTest extends TriggerSObjectHandler {
+    private class UserTriggerHandlerTest extends TriggerHandler {
         public UserTriggerHandlerTest() {
             this.isTestMode         = true;
             this.isTriggerExecuting = true;
@@ -14,6 +14,8 @@ private class TriggerSObjectHandler_Tests {
         public override Schema.SObjectType getSObjectType() {
             return Schema.User.SObjectType;
         }
+
+        public override void execute() {}
 
         public override void executeBeforeUpdate(List<SObject> updatedRecordList, Map<Id, SObject> updatedRecordMap, List<SObject> oldRecordList, Map<Id, SObject> oldRecordMap) {
             List<User> updatedUserList = (List<User>)updatedRecordList;
@@ -43,8 +45,8 @@ private class TriggerSObjectHandler_Tests {
         upsert triggerHandlerSettings;
 
         UserTriggerHandlerTest userTriggerHandler = new UserTriggerHandlerTest();
-        userTriggerHandler.currentOperation       = System.TriggerOperation.BEFORE_INSERT;
-        userTriggerHandler.newRecordList          = userList;
+        userTriggerHandler.currentOperation = System.TriggerOperation.BEFORE_INSERT;
+        userTriggerHandler.newRecordList    = userList;
 
         Test.startTest();
 
@@ -69,8 +71,8 @@ private class TriggerSObjectHandler_Tests {
     @isTest
     static void it_should_execute_before_insert() {
         UserTriggerHandlerTest userTriggerHandler = new UserTriggerHandlerTest();
-        userTriggerHandler.currentOperation       = System.TriggerOperation.BEFORE_INSERT;
-        userTriggerHandler.newRecordList          = userList;
+        userTriggerHandler.currentOperation = System.TriggerOperation.BEFORE_INSERT;
+        userTriggerHandler.newRecordList    = userList;
 
         Test.startTest();
 
@@ -82,11 +84,11 @@ private class TriggerSObjectHandler_Tests {
     @isTest
     static void it_should_execute_before_update() {
         UserTriggerHandlerTest userTriggerHandler = new UserTriggerHandlerTest();
-        userTriggerHandler.currentOperation       = System.TriggerOperation.BEFORE_UPDATE;
-        userTriggerHandler.newRecordList          = userList;
-        userTriggerHandler.newRecordMap           = new Map<Id, User>(userList);
-        userTriggerHandler.oldRecordList          = userList;
-        userTriggerHandler.oldRecordMap           = new Map<Id, User>(userList);
+        userTriggerHandler.currentOperation = System.TriggerOperation.BEFORE_UPDATE;
+        userTriggerHandler.newRecordList    = userList;
+        userTriggerHandler.newRecordMap     = new Map<Id, User>(userList);
+        userTriggerHandler.oldRecordList    = userList;
+        userTriggerHandler.oldRecordMap     = new Map<Id, User>(userList);
 
         Test.startTest();
 
